@@ -54,7 +54,7 @@ int no_of_nodes(Treenode<int>* root){
     return ans;
 }
 
-//Function to print the tree
+//Function to print the tree levelwise
 void Printtree(Treenode<int>* root){
     //edge case
     if(root==NULL){
