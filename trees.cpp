@@ -27,7 +27,7 @@ class Treenode{
 
 /*
 //Function to count the number of nodes
-//But uses extra space for queue
+//But uses extra space for queue//And it doesnt matter in which order we travel the node for count
 int no_of_nodes(Treenode<int>* &root){
     int count=0;
     queue<Treenode<int>*> pend_nodes;
@@ -46,10 +46,10 @@ int no_of_nodes(Treenode<int>* &root){
 */
 
 //Function to find the number of nodes in the tree
-int numnodes(Treenode<int>* root){
+int no_of_nodes(Treenode<int>* root){
     int ans=1;
     for(int i=0;i<root->children.size();i++){
-        ans+=numnodes(root->children[i]);
+        ans+=no_of_nodes(root->children[i]);
     }
     return ans;
 }
@@ -72,7 +72,7 @@ void Printtree(Treenode<int>* root){
         }
         cout<<endl;
     }
-    /*
+    /*  // Basically preorder traversal
     cout<<root->data<<":";
     for(int i=0;i<root->children.size();i++){
         cout<<root->children[i]->data<<",";
@@ -216,41 +216,114 @@ void deletetree(Treenode<int>* root){
 
 
 int sumNode(Treenode<int> *root){
-    // Called by maxSumNode /
-    if(root==nullptr) return 0;
-    int sum = root->data; // Calculate sumNode for root Node
-    int childCount = root->children.size();
-    for(int i=0; i<childCount; i++)
+    //used to find the maxsum node
+    if(root==NULL) return 0;
+    int sum = root->data;
+    for(int i=0; i<root->children.size(); i++)
         sum += root->children[i]->data;
     return sum;
 }
 
 //Function to find the node with maximum sum(i.e,sum of the data of the node and its immediate children)
 Treenode<int>* maxSumNode(Treenode<int> *root){
-   // /* Given a tree, find and return the node for which sum of data of all its
-    // * immideate children and the node itself is maximum. In the sum, data of node
-    // * itself and data of immediate children is to be taken. 
-    ///* Solution: We need to traverse all the nodes and calculate the Sum for each
-    // * Node. Also, we can check if maximum Sum is greater than maximum calculated
-    // * till now. Here we are using post Order Traversal but we may use any
-     //* traversal technique
-    if(root==nullptr) return nullptr;
-    Treenode<int> *result = root; // root node
+    /* Given a tree, find and return the node for which sum of data of all its
+     * immediate children and the node itself is maximum.
+     * Create a function to calculate the sum of itself and the immediate children
+     * Solution: We need to traverse all the nodes and calculate the Sum for each
+     * Node. Check whether the sum is greater than the previous node's sum.if yes then return that node.
+     * Here we are using post Order Traversal but we may use any
+     * traversal technique*/
+    if(root==nullptr) return nullptr; // Edge case
+    Treenode<int> *ans = root;//initialize ans to the root node first 
     int maxSum = sumNode(root); // Calculate sumNode for root Node
-    int childCount = root->children.size();
-    for(int i=0; i<childCount; i++)
+    for(int i=0; i<root->children.size(); i++)
     {
         Treenode<int> *temp = maxSumNode(root->children[i]);
         int sum = sumNode(temp);
-        if(sum > maxSum)
-        {
+        if(sum > maxSum){
             maxSum = sum;
-            result = temp;
+            ans = temp;
         }
     }
-    return result;
+    return ans;
 }
+
+//Function to find the next maximum data node and return it
+/*Given a generic tree and an integer n. Find and return the node with next larger element in the Tree i.e. find a node with value just greater than n.
+ *Return NULL if no node is present with the value greater than n.
 */
+Treenode<int>* Nextlargernode(Treenode<int>* root,int n){
+    //create a ans treenode and initialize it to null
+    Treenode<int>* ans;
+    //Do small calculation on the root node
+    if(root->data>n){
+        ans=root;
+    }
+    else
+    ans=NULL;
+    //Now we call recursion to take care of remaining nodes
+    for(int i=0;i<root->children.size();i++){
+        Treenode<int>* temp=Nextlargernode(root->children[i],n);
+        if(temp==NULL){
+            continue;
+        }
+        if(ans==NULL || ans->data > temp->data){
+            ans=temp;
+        }
+    }
+    return ans;
+}
+
+//Function to find the second largest number in the tree
+/*Second Largest Element In Tree
+Given a generic tree, find and return the node with second largest value in given tree. Return NULL if no node with required value is present.
+*/
+Treenode<int>* secondlargenode(Treenode<int>* root){
+    if(root==NULL || root->children.size()==0){
+        return NULL;
+    }
+    Treenode<int>* largest=root;
+    Treenode<int>* seclargest=root->children[0];
+    if(root->children[0]->data > root->data){
+        largest=root->children[0];
+        seclargest=root;
+    }
+    //using queue concept
+    queue<Treenode<int>*> q;
+    q.push(root);
+    while(!q.empty()){
+        Treenode<int>* curr=q.front();
+        q.pop();
+        for(int i=0;i<curr->children.size();i++){
+            q.push(curr->children[i]);
+            if(curr->children[i]->data > seclargest->data){
+                if(curr->children[i]->data > largest->data){
+                    seclargest=largest;
+                    largest=curr->children[i];
+                }
+                else {//if(curr->children[i]->data < largest->data){
+                    seclargest=curr->children[i];
+                }
+            }
+        }
+    }
+    return seclargest;
+}
+
+void replaceWithDepthValueHelper_func(TreeNode<int> *root, int depth){
+    /* In a given Generic Tree, replace each node with its depth value. You need
+      to just update the data of each node, no need to return or print anything.
+    */
+    if(root==NULL) return;
+    root->data = depth;
+    for(int i=0; i<root->children.size(); i++)
+        replaceWithDepthValueHelper_func(root->children[i],depth+1);
+}
+
+void replaceWithDepthValue(TreeNode<int>* root){
+    replaceWithDepthValueHelper(root,0);
+}
+
 
 int main(){
     /*
@@ -262,7 +335,7 @@ int main(){
     */
     Treenode<int> *root=takeinputLevelWise();
     Printtree(root);
-    int n=numnodes(root);
+    int n=no_of_nodes(root);
     cout<<n<<endl;
     //cout<<sumofnodes(root)<<endl;
     //cout<<findheight(root)<<endl;
@@ -273,6 +346,10 @@ int main(){
     //printpostorder(root);
     Treenode<int>* msn=maxSumNode(root);
     cout<<msn->data<<endl;
+    Treenode<int>* nln=Nextlargernode(root,10);
+    cout<<nln->data<<endl;
+    Treenode<int>* sln=secondlargenode(root);
+    cout<<sln->data<<endl;
    
     return 0;
 }
